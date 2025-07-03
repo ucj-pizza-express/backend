@@ -3,18 +3,22 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
-  password: String,
+  password: { type: String, required: true },
 });
 
-/***
- * This function check password field is updated or not in every request and if yes then hash it.
- */
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
+
+  if (!this.password) {
+    return next(new Error('Password is missing'));
+  }
+
+  try {
+    this.password = await bcrypt.hash(this.password, 10);
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
-
-
 
 module.exports = mongoose.model('User', userSchema);

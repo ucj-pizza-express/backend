@@ -5,8 +5,8 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const contactRoutes = require('./routes/contact');
 const Order = require('./Models/Order');
-const { createCrud } = require('@api-craft/crud-router');
 const authMiddleware = require('./middleware/auth');
+const orderRoutes = require("./routes/order");
 
 dotenv.config();
 const app = express();
@@ -16,14 +16,9 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/contact', contactRoutes); // ✅ Added contact route
+app.use("/api/order", orderRoutes);
 
-// Orders CRUD
-app.use('/api/orders', createCrud(Order, {
-    excluded: ['delete'],
-    middlewares: {
-        delete: authMiddleware
-    }
-}));
+
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })

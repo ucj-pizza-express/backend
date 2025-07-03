@@ -38,9 +38,9 @@ router.post('/send-otp', async (req, res) => {
 router.post('/signup', async (req, res) => {
   const { email, otp, password } = req.body;
 
-  // if (global.otpMemory?.[email] != otp) {
-  //   return res.status(400).json({ message: 'Invalid OTP' });
-  // }
+  if (global.otpMemory?.[email] != otp) {
+    return res.status(400).json({ message: 'Invalid OTP' });
+  }
 
   try {
     //const hashedPassword = await bcrypt.hash(password, 10);

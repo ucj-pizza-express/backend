@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
   customer: {
@@ -13,9 +13,9 @@ const orderSchema = new mongoose.Schema({
   },
   items: [
     {
-      pizzaId: { type: mongoose.Schema.Types.ObjectId, ref: 'Pizza', required: true },
+      pizzaId: { type: mongoose.Schema.Types.ObjectId, ref: 'Pizza', required: false },
       name: { type: String, required: true },
-      size: { type: String, enum: ['Small', 'Medium', 'Large'], required: true },
+      size: { type: String, enum: ['Small', 'Medium', 'Large', 'Regular'], required: true },
       quantity: { type: Number, required: true },
       price: { type: Number, required: true }
     }
@@ -26,4 +26,4 @@ const orderSchema = new mongoose.Schema({
   orderTime: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Order', orderSchema);
+module.exports = mongoose.model("Order", orderSchema);
