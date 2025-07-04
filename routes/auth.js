@@ -72,5 +72,107 @@ router.post('/login', async (req, res) => {
   }
 });
 
+//send mail to forgetpass
+// router.post('/forgot-password', async (req, res) => {
+//   const { email } = req.body;
+//   const otp = Math.floor(100000 + Math.random() * 900000);
+//   global.otpMemory = { [email]: otp };
+
+//   const transporter = nodemailer.createTransport({
+//     service: 'gmail',
+//     auth: {
+//       user: process.env.EMAIL_USER,
+//       pass: process.env.EMAIL_PASS,
+//     },
+//   });
+
+//   const mailOptions = {
+//     from: `"PizzaExpress" <${process.env.EMAIL_USER}>`,
+//     to: email,
+//     subject: 'Your OTP for Password Reset',
+//     text: `Your OTP is: ${otp}`,
+//   };
+
+//   try {
+//     await transporter.sendMail(mailOptions);
+//     res.status(200).json({ message: 'OTP sent successfully' });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'Failed to send OTP' });
+//   }
+// });
+
+
+const crypto = require('crypto');
+
+router.post('/forget-password', async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Generate reset token & expiration (1 hour)
+    const token = crypto.randomBytes(32).toString('hex');
+    const expireTime = Date.now() + 3600000;
+
+    user.resetToken = token;
+    user.resetTokenExpire = expireTime;
+    await user.save();
+
+    // Create reset link - adjust frontend URL as needed
+    const resetLink = `http://localhost:5173/updatepassword/${token}`;
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: `"PizzaExpress" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Reset Your Password',
+      html: `<p>Click <a href="${resetLink}">here</a> to reset your password. This link expires in 1 hour.</p>`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: 'Password reset link sent successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to send password reset link' });
+  }
+});
+
+//update pass
+//(notworking)
+
+router.post('/reset-password', async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  try {
+    const user = await User.findOne({
+      resetToken: token,
+      resetTokenExpire: { $gt: Date.now() }
+    });
+
+    if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.resetToken = undefined;
+    user.resetTokenExpire = undefined;
+
+    await user.save();
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 module.exports = router;
