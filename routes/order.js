@@ -29,4 +29,49 @@ router.get("/", async (req, res) => {
   }
 });
 
+// PATCH /api/orders/:id -> Update order status
+router.patch("/:id", async (req, res) => {
+  try {
+    const { status } = req.body;
+    const { id } = req.params;
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json(updatedOrder);
+  } catch (error) {
+    console.error("❌ Failed to update order:", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+// PATCH /api/order/:id - Update order status
+router.patch("/:id", async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json(updatedOrder);
+  } catch (error) {
+    console.error("❌ Failed to update order status:", error.message);
+    res.status(500).json({ message: "Failed to update order status", error: error.message });
+  }
+});
+
 module.exports = router;
