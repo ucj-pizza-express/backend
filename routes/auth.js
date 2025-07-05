@@ -176,4 +176,32 @@ router.post('/reset-password', async (req, res) => {
 });
 
 
+// GET all users
+router.get('/', async (req, res) => {
+  try { res.json(await User.find().select('-password')); }
+  catch (e) { res.status(500).json({ error: 'Server error' }); }
+});
+
+// POST add user
+router.post('/', async (req, res) => {
+  try { res.status(201).json(await User.create(req.body)); }
+  catch (e) { res.status(400).json({ error: 'Bad request' }); }
+});
+
+// DELETE user
+router.delete('/:id', async (req, res) => {
+  try { await User.findByIdAndDelete(req.params.id); res.sendStatus(204); }
+  catch (e) { res.status(404).json({ error: 'User not found' }); }
+});
+
+// PATCH update role / activity
+router.patch('/:id', async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(user);
+  } catch (e) { res.status(404).json({ error: 'User not found' }); }
+});
+
+
+
 module.exports = router;
