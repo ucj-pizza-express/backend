@@ -7,6 +7,7 @@ const contactRoutes = require('./routes/contact');
 const Order = require('./Models/Order');
 const authMiddleware = require('./middleware/auth');
 const orderRoutes = require("./routes/order");
+const adminRoutes = require("./routes/admin")
 
 dotenv.config();
 const app = express();
@@ -17,7 +18,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/contact', contactRoutes); // ✅ Added contact route
 app.use("/api/order", orderRoutes);
-
+app.use('/api/admin', adminRoutes);
 
 
 // MongoDB Connection
